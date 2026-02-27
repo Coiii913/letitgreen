@@ -75,36 +75,18 @@ function BottomNav() {
 
   return (
     <nav className="bottom-nav">
-      <button
-        type="button"
-        className={
-          "bottom-nav-btn" + (isRoute("/map") ? " bottom-nav-btn--active" : "")
-        }
-        onClick={() => navigate("/map")}
-        aria-label="Map"
-      >
-        <span className="bottom-nav-icon">📍</span>
+      <button className="bottom-nav-btn" onClick={() => navigate("/map")}>
+        {/* 公共目录下的图片直接用相对于根路径即可 */}
+        <img src="/map-icon.png" alt="Map" className="bottom-nav-icon-img" />
       </button>
-      <button
-        type="button"
-        className="bottom-nav-plus"
-        onClick={() => navigate("/post")}
-        aria-label="Post"
-      >
-        +
+
+      <button className="bottom-nav-plus" onClick={() => navigate("/post")}>
+        {/* 使用自己的加号 PNG，不需要额外文字 */}
+        <img src="/button_plus.png" alt="Add" className="bottom-nav-icon-img" />
       </button>
-      <button
-        type="button"
-        className={
-          "bottom-nav-btn" +
-          (isRoute("/favorites") || isRoute("/cart")
-            ? " bottom-nav-btn--active"
-            : "")
-        }
-        onClick={() => navigate("/favorites")}
-        aria-label="Favorites"
-      >
-        <span className="bottom-nav-icon">★</span>
+
+      <button className="bottom-nav-btn" onClick={() => navigate("/favorites")}>
+        <img src="/fav-icon.png" alt="Favorites" className="bottom-nav-icon-img" />
       </button>
     </nav>
   );

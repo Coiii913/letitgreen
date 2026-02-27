@@ -38,15 +38,7 @@ export default function HomePage() {
       <section className="home-hero">
         <SearchBar value={search} onChange={setSearch} />
         <CategoryTabs value={category} onChange={setCategory} />
-        <button
-          type="button"
-          className="free-recycle-tile"
-          onClick={() => setCategory("recommend")}
-        >
-          <div className="free-recycle-title">Free-</div>
-          <div className="free-recycle-title">Recycle</div>
-          <div className="free-recycle-icon">♻</div>
-        </button>
+  
       </section>
       <section className="home-grid-wrapper">
         {loadingItems && <div className="soft-pill">Loading items...</div>}

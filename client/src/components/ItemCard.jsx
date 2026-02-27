@@ -7,8 +7,12 @@ export default function ItemCard({ item }) {
   const { favorites, toggleFavorite } = useApp();
   const isFav = favorites.includes(item.id);
 
+  // 格式化碳排放数字
+  const co2Display = typeof item.co2Kg === "number" ? Math.abs(item.co2Kg).toFixed(1) : "2.3";
+
   return (
-    <article className="item-card">
+    <article className="item-card" onClick={() => navigate(`/items/${item.id}`)}>
+      {/* 收藏按钮 */}
       <button
         type="button"
         className="item-card-fav"
@@ -20,26 +24,32 @@ export default function ItemCard({ item }) {
       >
         {isFav ? "★" : "☆"}
       </button>
-      <div
-        className="item-card-image-wrapper"
-        onClick={() => navigate(`/items/${item.id}`)}
-      >
+
+      {/* 图片区域 */}
+      <div className="item-card-image-wrapper">
         <img
           src={item.imageUrl}
           alt={item.title}
           className="item-card-image"
         />
-        <div className="item-card-overlay">
+      </div>
+
+      {/* 信息区域：左右分布 */}
+      <div className="item-card-body">
+        {/* 左侧：标题 + 距离位置 */}
+        <div className="item-card-info-left">
           <h3 className="item-card-title">{item.title}</h3>
-          <div className="item-card-meta">
-            {(item.distanceKm ?? 0.5).toFixed(1)}km | {item.location?.label || item.location?.city || "Trinity College"}
+          <div className="item-card-location">
+            {(item.distanceKm ?? 0.5).toFixed(1)}km | {item.location?.label || "Dublin"}
           </div>
-          <div className="item-card-price">
-            {item.price}
-            <span className="item-card-price-currency">{item.currency || "€"}</span>
-          </div>
+        </div>
+
+        {/* 右侧：价格 + 碳排放方块 */}
+        <div className="item-card-info-right">
+          <div className="item-card-price">€{item.price}</div>
           <div className="item-card-co2-badge">
-            −{typeof item.co2Kg === "number" ? Math.abs(item.co2Kg).toFixed(1) : "2.3"}kg
+            <span className="co2-num">{co2Display}</span>
+            <span className="co2-label">kg CO₂</span>
           </div>
         </div>
       </div>

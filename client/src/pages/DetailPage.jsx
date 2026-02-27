@@ -125,9 +125,9 @@ export default function DetailPage() {
             <button
               type="button"
               className="solid-btn secondary"
-              onClick={() => addToCart(item.id)}
+              onClick={() => toggleFavorite(item.id)}
             >
-              Add to cart
+              {isFav ? "✓ Added" : "Add to cart"}
             </button>
           </div>
         </section>
