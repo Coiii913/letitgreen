@@ -6,9 +6,13 @@ const AppContext = createContext(null);
 const FAVORITES_KEY = "green_market_favorites";
 const CART_KEY = "green_market_cart";
 
+// 默认中心（都柏林），定位失败时使用
+const DEFAULT_CENTER = { lat: 53.3438, lng: -6.2546 };
+
 export function AppProvider({ children }) {
   const [items, setItems] = useState([]);
   const [loadingItems, setLoadingItems] = useState(false);
+  const [userLocation, setUserLocation] = useState(null);
   const [favorites, setFavorites] = useState(() => {
     try {
       const raw = localStorage.getItem(FAVORITES_KEY);
@@ -35,6 +39,15 @@ export function AppProvider({ children }) {
         console.error("Failed to load items", err);
       })
       .finally(() => setLoadingItems(false));
+  }, []);
+
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => setUserLocation(DEFAULT_CENTER),
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
+    );
   }, []);
 
   useEffect(() => {
@@ -67,13 +80,14 @@ export function AppProvider({ children }) {
       items,
       setItems,
       loadingItems,
+      userLocation,
       favorites,
       toggleFavorite,
       cart,
       addToCart,
       removeFromCart
     }),
-    [items, loadingItems, favorites, cart]
+    [items, loadingItems, userLocation, favorites, cart]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -1,11 +1,22 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "../state/AppContext.jsx";
+import { distanceKm } from "../utils/geoUtils.js";
 
 export default function ItemCard({ item }) {
   const navigate = useNavigate();
-  const { favorites, toggleFavorite } = useApp();
+  const { favorites, toggleFavorite, userLocation } = useApp();
   const isFav = favorites.includes(item.id);
+
+  const distance =
+    userLocation && item.location?.lat != null && item.location?.lng != null
+      ? distanceKm(
+          userLocation.lat,
+          userLocation.lng,
+          item.location.lat,
+          item.location.lng
+        )
+      : (item.distanceKm ?? 0.5);
 
   // Compute CO2 saved for display using available fields with fallbacks.
   const computeCo2Saved = (it) => {
@@ -76,7 +87,7 @@ export default function ItemCard({ item }) {
         <div className="item-card-info-left">
           <h3 className="item-card-title">{item.title}</h3>
           <div className="item-card-location">
-            {(item.distanceKm ?? 0.5).toFixed(1)}km | {item.location?.label || "Dublin"}
+            {distance.toFixed(1)}km | {item.location?.label || item.location?.city || "Dublin"}
           </div>
         </div>
 
@@ -84,7 +95,7 @@ export default function ItemCard({ item }) {
         <div className="item-card-info-right">
           <div className="item-card-price">€{item.price}</div>
           <div className="item-card-co2-badge">
-            <span className="co2-num">{co2Display}</span>
+            <span className="co2-num">-{co2Display}</span>
             <span className="co2-label">kg CO₂</span>
           </div>
         </div>

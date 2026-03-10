@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect } from "react";
+import axios from "axios";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import { useNavigate } from "react-router-dom";
@@ -6,20 +7,38 @@ import { useApp } from "../state/AppContext.jsx";
 
 const dublinCenter = [53.3438, -6.2546];
 
-const itemIcon = new L.Icon({
-  iconUrl:
-    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
+/**
+ * 地图图标定义位置（可手动修改）：
+ * - 本文件 MapPage.jsx：itemIcon, recycleIcon, recycleTcdIcon, yourLocationIcon（第 11-40 行）
+ * - 样式 client/src/styles.css：.item-marker, .recycle-marker, .recycle-tcd-marker, .you-marker
+ */
+
+// 黄色标记：卖家发布的商品位置
+const itemIcon = new L.DivIcon({
+  className: "item-marker",
+  html: "●",
+  iconSize: [20, 20],
+  iconAnchor: [10, 10]
 });
+
+// 回收符号 ♻，用绝对定位确保居中
+// src/pages/MapPage.jsx
+
+// 回收符号 ♻，用 flex 居中
+const recycleIconHtml = '<div class="recycle-icon-inner">♻</div>';
 
 const recycleIcon = new L.DivIcon({
   className: "recycle-marker",
-  html: "♻",
+  html: recycleIconHtml,
   iconSize: [24, 24],
   iconAnchor: [12, 12]
+});
+
+const recycleTcdIcon = new L.DivIcon({
+  className: "recycle-tcd-marker",
+  html: recycleIconHtml,
+  iconSize: [26, 26],
+  iconAnchor: [13, 13]
 });
 
 const yourLocationIcon = new L.DivIcon({
@@ -30,6 +49,13 @@ const yourLocationIcon = new L.DivIcon({
 });
 
 const RECYCLE_POINTS = [
+  {
+    id: "recycle-tcd",
+    name: "TCD Recycling Point (Trinity College Dublin)",
+    lat: 53.3438,
+    lng: -6.2546,
+    isTcd: true
+  },
   {
     id: "recycle-1",
     name: "DCC Recycling Centre",
@@ -45,18 +71,32 @@ const RECYCLE_POINTS = [
 ];
 
 export default function MapPage() {
-  const { items } = useApp();
+  const { items, setItems } = useApp();
   const navigate = useNavigate();
+
+  // 进入地图页时拉取商品列表，确保新添加的商品标记能显示
+  useEffect(() => {
+    const fetchItems = () => {
+      axios.get("/api/items").then((res) => setItems(res.data || [])).catch(() => {});
+    };
+    fetchItems();
+    // 每隔几秒刷新一次，方便刚发布后看到新商品（可选）
+    const t = setInterval(fetchItems, 5000);
+    return () => clearInterval(t);
+  }, [setItems]);
 
   return (
     <div className="page map-page">
       <h2 className="section-title">Resource Map</h2>
       <div className="map-legend">
         <span className="legend-item">
-          <span className="legend-dot item-dot" /> Listings
+          <span className="legend-dot item-dot" /> Listings (seller locations)
         </span>
         <span className="legend-item">
-          <span className="legend-dot recycle-dot" /> Recycle points
+          <span className="legend-dot recycle-tcd-dot" /> TCD Recycling Point
+        </span>
+        <span className="legend-item">
+          <span className="legend-dot recycle-dot" /> Other recycle points
         </span>
         <span className="legend-item">
           <span className="legend-dot you-dot" /> Your location
@@ -78,39 +118,43 @@ export default function MapPage() {
             <Popup>Your location (Trinity College Dublin area)</Popup>
           </Marker>
 
-          {items.map((item) => (
-            <Marker
-              key={item.id}
-              position={[item.location?.lat || dublinCenter[0], item.location?.lng || dublinCenter[1]]}
-              icon={itemIcon}
-            >
-              <Popup>
-                <div className="map-popup">
-                  <img src={item.imageUrl} alt={item.title} />
-                  <div className="map-popup-text">
-                    <div className="map-popup-title">{item.title}</div>
-                    <div className="map-popup-price">
-                      {item.price}
-                      <span>{item.currency || "€"}</span>
+          {items.map((item) => {
+            const lat = item.location?.lat ?? dublinCenter[0];
+            const lng = item.location?.lng ?? dublinCenter[1];
+            return (
+              <Marker
+                key={item.id}
+                position={[lat, lng]}
+                icon={itemIcon}
+              >
+                <Popup>
+                  <div
+                    className="map-popup map-popup-clickable"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => navigate(`/items/${item.id}`)}
+                    onKeyDown={(e) => e.key === "Enter" && navigate(`/items/${item.id}`)}
+                  >
+                    <img src={item.imageUrl} alt={item.title} />
+                    <div className="map-popup-text">
+                      <div className="map-popup-title">{item.title}</div>
+                      <div className="map-popup-price">
+                        {item.price}
+                        <span>{item.currency || "€"}</span>
+                      </div>
+                      <span className="map-popup-link">View details →</span>
                     </div>
-                    <button
-                      type="button"
-                      className="outline-btn small"
-                      onClick={() => navigate(`/items/${item.id}`)}
-                    >
-                      View
-                    </button>
                   </div>
-                </div>
-              </Popup>
-            </Marker>
-          ))}
+                </Popup>
+              </Marker>
+            );
+          })}
 
           {RECYCLE_POINTS.map((p) => (
             <Marker
               key={p.id}
               position={[p.lat, p.lng]}
-              icon={recycleIcon}
+              icon={p.isTcd ? recycleTcdIcon : recycleIcon}
             >
               <Popup>{p.name}</Popup>
             </Marker>

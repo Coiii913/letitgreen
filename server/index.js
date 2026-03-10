@@ -8,6 +8,47 @@ const sharp = require("sharp");
 
 dotenv.config();
 
+// 爱尔兰主要城市中心坐标（地理编码失败时的回退）
+const IRISH_CITY_COORDS = {
+  Dublin: { lat: 53.3498, lng: -6.2603 },
+  Cork: { lat: 51.8985, lng: -8.4756 },
+  Galway: { lat: 53.2707, lng: -9.0568 },
+  Limerick: { lat: 52.6639, lng: -8.6267 },
+  Waterford: { lat: 52.2593, lng: -7.1101 },
+  Belfast: { lat: 54.5973, lng: -5.9301 },
+  Derry: { lat: 54.9966, lng: -7.3086 },
+  Drogheda: { lat: 53.7179, lng: -6.3581 },
+  Dundalk: { lat: 54.0060, lng: -6.4027 },
+  Bray: { lat: 53.2027, lng: -6.0983 },
+  Sligo: { lat: 54.2766, lng: -8.4761 },
+  Kilkenny: { lat: 52.6541, lng: -7.2448 }
+};
+
+async function geocodeAddress(location) {
+  const { city, address, postcode } = location || {};
+  const parts = [address, city, postcode, "Ireland"].filter(Boolean);
+  if (parts.length < 1) return null;
+  const query = parts.length >= 2 ? parts.join(", ") : `${parts[0]}, Ireland`;
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`,
+      { headers: { "User-Agent": "GreenMarket/1.0" } }
+    );
+    const data = await res.json();
+    if (Array.isArray(data) && data[0]) {
+      return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+    }
+  } catch (err) {
+    console.error("Geocoding failed:", err);
+  }
+  // 回退：使用城市中心坐标
+  const cityName = (city || "Dublin").trim();
+  if (IRISH_CITY_COORDS[cityName]) {
+    return IRISH_CITY_COORDS[cityName];
+  }
+  return IRISH_CITY_COORDS.Dublin;
+}
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -30,12 +71,12 @@ let items = [
     currency: "EUR",
     distanceKm: 0.5,
     location: {
-      label: "Trinity College Dublin",
+      label: "Grafton Street, Dublin",
       city: "Dublin",
-      address: "College Green",
-      postcode: "D02 PN40",
-      lat: 53.3438,
-      lng: -6.2546
+      address: "Grafton Street",
+      postcode: "D02",
+      lat: 53.3425,
+      lng: -6.2605
     },
     condition: "New",
     brand: "Local",
@@ -135,6 +176,35 @@ app.post("/api/items", async (req, res) => {
     keywords = description.split(' ').slice(0, 5);
   }
 
+  // 1. AI 估算该商品减少的碳排放量（kg CO2）
+  let aiCo2Kg = null;
+  try {
+    const aiRes = await openai.chat.completions.create({
+      model: "deepseek-chat",
+      messages: [
+        {
+          role: "user",
+          content: `Estimate how much CO2 (in kg) is saved by buying this second-hand item instead of new. Consider: item type="${title}", description="${description}", price=${numPrice} EUR. Return ONLY a single number (e.g. 2.3 or 15), no units or explanation.`
+        }
+      ]
+    });
+    const parsed = parseFloat(String(aiRes.choices[0]?.message?.content || "").replace(/,/g, ".").trim());
+    if (!Number.isNaN(parsed) && parsed > 0 && parsed < 500) aiCo2Kg = parsed;
+  } catch (err) {
+    console.error("AI CO2 estimation failed", err);
+  }
+
+  // 2. 根据用户填写的地址解析经纬度
+  let lat = location?.lat;
+  let lng = location?.lng;
+  const coords = await geocodeAddress(location);
+  if (coords) {
+    lat = coords.lat;
+    lng = coords.lng;
+  }
+  if (lat == null) lat = 53.3438;
+  if (lng == null) lng = -6.2546;
+
   const newItem = {
     id: String(Date.now()),
     title: String(title).trim(),
@@ -147,12 +217,12 @@ app.post("/api/items", async (req, res) => {
       city: location?.city || "Dublin",
       address: location?.address || "",
       postcode: location?.postcode || "",
-      lat: location?.lat ?? 53.3438,
-      lng: location?.lng ?? -6.2546
+      lat,
+      lng
     },
     condition: condition || "Used",
     brand: brand ? String(brand).trim() : "-",
-    co2Kg: co2Kg ?? -2.3,
+    co2Kg: typeof co2Kg === "number" ? co2Kg : (aiCo2Kg != null ? -aiCo2Kg : -2.3),
     postedMinutesAgo: 0,
     imageUrl:
       imageUrl && typeof imageUrl === "string" && imageUrl.startsWith("data:")

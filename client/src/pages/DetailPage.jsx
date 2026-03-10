@@ -123,7 +123,7 @@ export default function DetailPage() {
               </div>
               <div>
                 <div className="meta-label">CO₂</div>
-                <div className="meta-value">{typeof item.co2Saved === 'number' ? `${item.co2Saved.toFixed(1)}kg` : (typeof item.co2Kg === 'number' ? `${Math.abs(item.co2Kg).toFixed(1)}kg` : '-')}</div>
+                <div className="meta-value">{typeof item.co2Saved === 'number' ? `-${item.co2Saved.toFixed(1)}kg` : (typeof item.co2Kg === 'number' ? `${item.co2Kg.toFixed(1)}kg` : '-')}</div>
               </div>
             </div>
           </div>

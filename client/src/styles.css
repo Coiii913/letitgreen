@@ -1219,7 +1219,21 @@ body {
 
 
 .item-dot {
-  background: #2c7edb;
+  background: #FFC107;
+}
+
+
+.item-marker {
+  background: #FFC107;
+  color: #5D4037;
+  border: 2px solid #FF8F00;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
 }
 
 
@@ -1228,21 +1242,64 @@ body {
 }
 
 
+.recycle-tcd-dot {
+  background: #2E7D32;
+}
+
+
 .you-dot {
   background: #c62828;
 }
 
 
+/* 水滴形回收点标记，♻ 用绝对定位精确居中 */
+.recycle-marker,
+.recycle-tcd-marker {
+  position: relative !important;
+  overflow: visible;
+}
+
 .recycle-marker {
-  background: #34493A;
+  background: #34493A !important;
   color: #E8F5EE;
-  border-radius: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  width: 24px !important;
+  height: 24px !important;
+  border: none !important;
+}
+
+.recycle-marker .recycle-icon-inner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+  line-height: 0;
   font-size: 12px;
+  display: block;
+  text-align: center;
+}
+
+.recycle-tcd-marker {
+  background: #2E7D32 !important;
+  color: #E8F5EE;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  width: 26px !important;
+  height: 26px !important;
+  border: 2px solid #1B5E20 !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.recycle-tcd-marker .recycle-icon-inner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+  line-height: 0;
+  font-size: 14px;
+  display: block;
+  text-align: center;
 }
 
 
@@ -1262,6 +1319,22 @@ body {
 .map-popup {
   display: flex;
   gap: 8px;
+}
+
+.map-popup-clickable {
+  cursor: pointer;
+}
+
+.map-popup-clickable:hover .map-popup-title,
+.map-popup-clickable:hover .map-popup-link {
+  text-decoration: underline;
+}
+
+.map-popup-link {
+  font-size: 12px;
+  color: var(--color-primary, #34493A);
+  margin-top: 4px;
+  display: inline-block;
 }
 
 
@@ -1298,4 +1371,153 @@ body {
   .post-top-row {
     grid-template-columns: 1fr;
   }
+}
+
+/* src/styles.css - 添加到文件末尾 */
+
+/* 地图标记样式 */
+.item-marker {
+  background-color: #FFD700;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000;
+  font-size: 20px;
+  font-weight: bold;
+  width: 20px;
+  height: 20px;
+}
+
+.recycle-marker, .recycle-tcd-marker {
+  background-color: #4CAF50;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.recycle-tcd-marker {
+  background-color: #2E7D32;  /* 更深的绿色区分 TCD 回收点 */
+}
+
+.recycle-icon-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 16px;
+  color: white;
+  line-height: 1;
+  transform: translateY(-1px); /* 微调垂直居中 */
+}
+
+.recycle-tcd-marker .recycle-icon-inner {
+  font-size: 18px;
+}
+
+.you-marker {
+  background-color: #FF4444;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  width: 18px;
+  height: 18px;
+}
+
+/* 图例样式 */
+.map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin: 20px 0;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.legend-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.item-dot {
+  background-color: #FFD700;
+}
+
+.recycle-tcd-dot {
+  background-color: #2E7D32;
+}
+
+.recycle-dot {
+  background-color: #4CAF50;
+}
+
+.you-dot {
+  background-color: #FF4444;
+}
+
+/* 弹窗样式 */
+.map-popup {
+  display: flex;
+  gap: 10px;
+  min-width: 250px;
+  cursor: pointer;
+}
+
+.map-popup img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.map-popup-text {
+  flex: 1;
+}
+
+.map-popup-title {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.map-popup-price {
+  color: #4CAF50;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.map-popup-link {
+  color: #4CAF50;
+  font-size: 12px;
+  text-decoration: underline;
+}
+
+/* 确保 Leaflet 容器正确显示 */
+.leaflet-map {
+  height: 600px;
+  width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
