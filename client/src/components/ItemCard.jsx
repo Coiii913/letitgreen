@@ -7,8 +7,44 @@ export default function ItemCard({ item }) {
   const { favorites, toggleFavorite } = useApp();
   const isFav = favorites.includes(item.id);
 
-  // 格式化碳排放数字
-  const co2Display = typeof item.co2Kg === "number" ? Math.abs(item.co2Kg).toFixed(1) : "2.3";
+  // Compute CO2 saved for display using available fields with fallbacks.
+  const computeCo2Saved = (it) => {
+    // If backend provided explicit productionEmission and decayRate, use formula.
+    const p = typeof it.productionEmission === "number" ? it.productionEmission : null; // in kg
+    const d = typeof it.decayRate === "number" ? it.decayRate : null; // fraction 0..1
+
+    if (p !== null && d !== null) {
+      return Math.max(0, p * (1 - d));
+    }
+
+    // If only productionEmission provided, assume a default decay rate (20%).
+    if (p !== null) {
+      return Math.max(0, p * (1 - 0.2));
+    }
+
+    // If legacy co2Kg exists and is negative (meaning saved), use its absolute value.
+    if (typeof it.co2Kg === "number") {
+      return Math.abs(it.co2Kg);
+    }
+
+    // Last-resort heuristic estimates based on tags and price.
+    const baseByTag = (() => {
+      if (it.tags?.includes("electronics")) return 80;
+      if (it.tags?.includes("living") || it.tags?.includes("plant")) return 15;
+      if (it.tags?.includes("clothing")) return 8;
+      if (it.tags?.includes("sports")) return 25;
+      return 20;
+    })();
+
+    // Scale by price a little (higher price -> likely larger item)
+    const priceFactor = Math.min(3, Math.max(0.5, (Number(it.price) || 20) / 50));
+    const estimatedProduction = baseByTag * priceFactor;
+    const assumedDecay = 0.2;
+    return Math.max(0, estimatedProduction * (1 - assumedDecay));
+  };
+
+  const co2SavedNum = computeCo2Saved(item);
+  const co2Display = (typeof co2SavedNum === "number" ? co2SavedNum : 2.3).toFixed(1);
 
   return (
     <article className="item-card" onClick={() => navigate(`/items/${item.id}`)}>

@@ -49,22 +49,23 @@ export default function PostPage() {
   };
 
   const handleVisionAnalyze = async () => {
+    if (!imagePreview) {
+      alert("Please upload an image first.");
+      return;
+    }
     setVisionLoading(true);
     try {
       const res = await axios.post("/api/vision/analyze", {
-        // image: imagePreview, // hook real file/URL here later
+        image: imagePreview
       });
       const suggestion = res.data?.suggestion;
       if (suggestion) {
-        if (!title) {
-          setTitle(suggestion.title || "");
-        }
-        if (!description) {
-          setDescription(suggestion.description || "");
-        }
+        setTitle(suggestion.title || title);
+        setDescription(suggestion.description || description);
       }
     } catch (err) {
       console.error("Vision analyze failed", err);
+      alert("Vision API request failed. Check console for details.");
     } finally {
       setVisionLoading(false);
     }
@@ -174,7 +175,7 @@ export default function PostPage() {
                 onClick={handleEnhance}
                 disabled={aiLoading}
               >
-                {aiLoading ? "AI is thinking..." : "AI polish text"}
+                {aiLoading ? "AI is thinking..." : "AI"}
               </button>
             </div>
           </div>

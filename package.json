@@ -23,11 +23,14 @@
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.4.0",
-    "express": "^4.19.0"
+    "express": "^4.19.0",
+    "node-fetch": "^2.7.0",
+    "openai": "^6.26.0",
+    "sharp": "^0.34.5",
+    "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
     "concurrently": "^8.2.0",
     "nodemon": "^3.0.2"
   }
 }
-

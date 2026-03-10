@@ -95,6 +95,39 @@ export default function DetailPage() {
 
           <p className="detail-description">{item.description}</p>
 
+          {/* Meta icons row: condition, brand, CO2 */}
+          <div className="detail-meta-row">
+            <div className="detail-meta">
+              <div className="meta-circle">
+                <img src="/icons/list.png" alt="Condition" />
+              </div>
+              <div>
+                <div className="meta-label">Condition</div>
+                <div className="meta-value">{item.condition || 'New'}</div>
+              </div>
+            </div>
+
+            <div className="detail-meta">
+              <div className="meta-circle">
+                <img src="/icons/tag.png" alt="Brand" />
+              </div>
+              <div>
+                <div className="meta-label">Brand</div>
+                <div className="meta-value">{item.brand || '—'}</div>
+              </div>
+            </div>
+
+            <div className="detail-meta">
+              <div className="meta-circle">
+                <img src="/icons/co2.png" alt="CO2" />
+              </div>
+              <div>
+                <div className="meta-label">CO₂</div>
+                <div className="meta-value">{typeof item.co2Saved === 'number' ? `${item.co2Saved.toFixed(1)}kg` : (typeof item.co2Kg === 'number' ? `${Math.abs(item.co2Kg).toFixed(1)}kg` : '-')}</div>
+              </div>
+            </div>
+          </div>
+
           <section className="detail-ai-report">
             <h2>AI Environmental Snapshot</h2>
             <p>
