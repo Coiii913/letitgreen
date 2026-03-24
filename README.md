@@ -1,43 +1,36 @@
-# letitgreen
+#LetItGreen
+Project Directory Structure
+server/: Backend code (Entry point: server/index.js)
 
-项目目录结构：
+client/: Frontend React + Vite code
 
-- `server/` 后端代码（入口 `server/index.js`）
-- `client/` 前端 React + Vite 代码
-- `package.json` 根脚本，支持并发启动
-- `eng.traineddata` OCR 训练数据（可放一份即可）
+package.json: Root scripts, supports concurrent startup
 
-## 快速启动
+eng.traineddata: OCR training data (one copy is sufficient)
 
-1. 安装依赖
+Quick Start
+Install Dependencies
 
-```bash
+Bash
 npm install
 cd client && npm install
-```
+Configure Environment Variables
 
-2. 复制环境变量
-
-```bash
+Bash
 copy .env.example .env
-# 编辑 .env: 填写 MONGO_URI、DEESEEK_API_KEY
-```
+# Edit .env: Provide MONGO_URI and DEEPSEEK_API_KEY
+Development Mode (Run frontend and backend concurrently)
 
-3. 开发模式（前后端同时运行）
-
-```bash
+Bash
 npm run dev
-```
+Production Mode
 
-4. 生产模式
-
-```bash
+Bash
 npm run build
 npm start
-```
+FAQs
+If the frontend runs concurrently from http://localhost:5173, the backend API at /api should be accessible as usual.
 
-## 常见问题
+To serve the static frontend directly from the backend: Run npm run build first, then npm start.
 
-- 若前端从 `http://localhost:5173` 并发运行，后端接口 `/api` 正常访问。
-- 若希望后端直接服务静态前端：先 `npm run build`，然后 `npm start`。
-- 运行失败时，检查 `MONGO_URI` 是否可连，`DEESEEK_API_KEY` 是否可用。
+If the application fails to run, check if the MONGO_URI is reachable and ensure the DEEPSEEK_API_KEY is valid and active.
